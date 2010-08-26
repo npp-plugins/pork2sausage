@@ -349,7 +349,7 @@ void launchProgram(const TCHAR *programPath, const TCHAR *param, const TCHAR *pr
                     fileContent.resize(pOutputLen, 0);
 
                     // read the file
-                    file.read(reinterpret_cast<char*>(&fileContent[0]), pOutputLen);
+                    file.read(reinterpret_cast<char*>(&fileContent[0]), (std::streamsize)pOutputLen);
 
                     // close the file
                     file.close();
