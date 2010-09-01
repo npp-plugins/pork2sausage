@@ -206,11 +206,11 @@ int getCmdsFromConf(const TCHAR *confPath, CmdParam *cmdParam, int maxNbCmd)
         TCHAR progCmd[1024];
         TCHAR workDir[1024];
 
-		GetPrivateProfileString(pFn, TEXT("progPath"), TEXT("invalid"), progPath, 1024, confPath);
-        GetPrivateProfileString(pFn, TEXT("progCmd"), TEXT("invalid"), progCmd, 1024, confPath);
-        GetPrivateProfileString(pFn, TEXT("workDir"), TEXT("invalid"), workDir, 1024, confPath);
+		GetPrivateProfileString(pFn, TEXT("progPath"), TEXT(""), progPath, 1024, confPath);
+        GetPrivateProfileString(pFn, TEXT("progCmd"), TEXT(""), progCmd, 1024, confPath);
+        GetPrivateProfileString(pFn, TEXT("workDir"), TEXT(""), workDir, 1024, confPath);
 
-		if ((lstrcmp(progPath, TEXT("invalid")) != 0) && (lstrcmp(progCmd, TEXT("invalid")) != 0) && (lstrcmp(workDir, TEXT("invalid")) != 0))
+		if (progPath[0] && progCmd[0] && workDir[0])
 		{
 			lstrcpy(cmdParam[i]._cmdName, pFn);
             lstrcpy(cmdParam[i]._progPath, progPath);
@@ -220,8 +220,8 @@ int getCmdsFromConf(const TCHAR *confPath, CmdParam *cmdParam, int maxNbCmd)
             // optional parameter here
 			TCHAR progInput[1024];
             TCHAR progOutput[1024];
-			GetPrivateProfileString(pFn, TEXT("progInput"), TEXT("invalid"), progInput, 1024, confPath);
-            GetPrivateProfileString(pFn, TEXT("progOutput"), TEXT("invalid"), progOutput, 1024, confPath);
+			GetPrivateProfileString(pFn, TEXT("progInput"), TEXT(""), progInput, 1024, confPath);
+            GetPrivateProfileString(pFn, TEXT("progOutput"), TEXT(""), progOutput, 1024, confPath);
             lstrcpy(cmdParam[i]._progInput, progInput);
             lstrcpy(cmdParam[i]._progOutput, progOutput);
 			i++;
