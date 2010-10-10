@@ -18,8 +18,8 @@
 #ifndef NPP_TOOLS_H
 #define NPP_TOOLS_H
 
-#define VERSION_VALUE "1.0\0"
-#define VERSION_DIGITALVALUE 1, 0, 0, 0
+#define VERSION_VALUE "1.1\0"
+#define VERSION_DIGITALVALUE 1, 1, 0, 0
 
 #define IDD_ABOUTBOX 250
 
@@ -82,21 +82,21 @@ struct CmdParam {
 	
     TCHAR _progInput[1024];
     TCHAR _progOutput[1024];
+    bool _doReplaceSelection;
 	
-    CmdParam() {
+    CmdParam() : _doReplaceSelection(true){
 		_cmdName[0] = '\0';
 		_progPath[0] = '\0';
         _progCmd[0] = '\0';
         _workDir[0] = '\0';
         _progInput[0] = '\0';
         _progOutput[0] = '\0';
-
 	};
 };
 
 
 
-void launchProgram(const TCHAR *programPath, const TCHAR *param , const TCHAR *programDir = NULL, const TCHAR *programInput = NULL, const TCHAR *programOutput = NULL);
+void launchProgram(const CmdParam & cmdParam);
 
 int getCmdsFromConf(const TCHAR *confPath, CmdParam *cmdParam, int maxNbCmd);
 

@@ -220,10 +220,14 @@ int getCmdsFromConf(const TCHAR *confPath, CmdParam *cmdParam, int maxNbCmd)
             // optional parameter here
 			TCHAR progInput[1024];
             TCHAR progOutput[1024];
+            TCHAR replaceSelection[8];
 			GetPrivateProfileString(pFn, TEXT("progInput"), TEXT(""), progInput, 1024, confPath);
             GetPrivateProfileString(pFn, TEXT("progOutput"), TEXT(""), progOutput, 1024, confPath);
+            GetPrivateProfileString(pFn, TEXT("replaceSelection"), TEXT("true"), replaceSelection, 8, confPath);
             lstrcpy(cmdParam[i]._progInput, progInput);
             lstrcpy(cmdParam[i]._progOutput, progOutput);
+            if (generic_stricmp(TEXT("false"), replaceSelection) == 0)
+                cmdParam[i]._doReplaceSelection = false;
 			i++;
 		}
 
@@ -248,8 +252,15 @@ void replaceStr(generic_string & str, generic_string str2BeReplaced, generic_str
 		str.replace(pos, str2BeReplaced.length(), replacement);
 };
 
-void launchProgram(const TCHAR *programPath, const TCHAR *param, const TCHAR *programDir, const TCHAR *progInput, const TCHAR *progOutput)
+void launchProgram(const CmdParam & cmdParam)
 {
+    const TCHAR *programPath = cmdParam._progPath; 
+    const TCHAR *param = cmdParam._progCmd;
+    const TCHAR *programDir = cmdParam._workDir;
+    const TCHAR *progInput = cmdParam._progInput;
+    const TCHAR *progOutput = cmdParam._progOutput;
+    bool doReplace = cmdParam._doReplaceSelection;
+
 	HWND hCurrScintilla = getCurrentScintillaHandle();
 
     size_t start = ::SendMessage(hCurrScintilla, SCI_GETSELECTIONSTART, 0, 0);
@@ -330,7 +341,7 @@ void launchProgram(const TCHAR *programPath, const TCHAR *param, const TCHAR *pr
         const char *pOutput = NULL;
         size_t pOutputLen = 0;
         // If progOutput is defined, then we search the file to read
-        if (progOutputStr != TEXT(""))
+        if (progOutputStr != TEXT("") && doReplace)
         { 
             if (::PathFileExists(progOutputStr.c_str()))
             {
@@ -373,7 +384,7 @@ void launchProgram(const TCHAR *programPath, const TCHAR *param, const TCHAR *pr
             }
         }
         // otherwise, we look in stdout
-        else if (program.hasStdout())
+        else if (program.hasStdout() && doReplace)
         {
             
 #ifdef UNICODE
@@ -389,7 +400,8 @@ void launchProgram(const TCHAR *programPath, const TCHAR *param, const TCHAR *pr
         }
         else
         {
-            ::MessageBox(NULL, TEXT("No output"), TEXT("Problem"), MB_OK);
+            if (doReplace)
+                ::MessageBox(NULL, TEXT("No output"), TEXT("Problem"), MB_OK);
         }
     }
     else
@@ -417,26 +429,26 @@ BOOL CALLBACK dlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 	return FALSE;
 }
 
-void launchProgram_00() {launchProgram( cmdParam[0]._progPath,  cmdParam[0]._progCmd,  cmdParam[0]._workDir ,cmdParam[0]._progInput,  cmdParam[0]._progOutput);}
-void launchProgram_01() {launchProgram( cmdParam[1]._progPath,  cmdParam[1]._progCmd,  cmdParam[1]._workDir ,cmdParam[1]._progInput,  cmdParam[1]._progOutput);}
-void launchProgram_02() {launchProgram( cmdParam[2]._progPath,  cmdParam[2]._progCmd,  cmdParam[2]._workDir ,cmdParam[2]._progInput,  cmdParam[2]._progOutput);}
-void launchProgram_03() {launchProgram( cmdParam[3]._progPath,  cmdParam[3]._progCmd,  cmdParam[3]._workDir ,cmdParam[3]._progInput,  cmdParam[3]._progOutput);}
-void launchProgram_04() {launchProgram( cmdParam[4]._progPath,  cmdParam[4]._progCmd,  cmdParam[4]._workDir ,cmdParam[4]._progInput,  cmdParam[4]._progOutput);}
-void launchProgram_05() {launchProgram( cmdParam[5]._progPath,  cmdParam[5]._progCmd,  cmdParam[5]._workDir ,cmdParam[5]._progInput,  cmdParam[5]._progOutput);}
-void launchProgram_06() {launchProgram( cmdParam[6]._progPath,  cmdParam[6]._progCmd,  cmdParam[6]._workDir ,cmdParam[6]._progInput,  cmdParam[6]._progOutput);}
-void launchProgram_07() {launchProgram( cmdParam[7]._progPath,  cmdParam[7]._progCmd,  cmdParam[7]._workDir ,cmdParam[7]._progInput,  cmdParam[7]._progOutput);}
-void launchProgram_08() {launchProgram( cmdParam[8]._progPath,  cmdParam[8]._progCmd,  cmdParam[8]._workDir ,cmdParam[8]._progInput,  cmdParam[8]._progOutput);}
-void launchProgram_09() {launchProgram( cmdParam[9]._progPath,  cmdParam[9]._progCmd,  cmdParam[9]._workDir ,cmdParam[9]._progInput,  cmdParam[9]._progOutput);}
-void launchProgram_10() {launchProgram( cmdParam[10]._progPath, cmdParam[10]._progCmd, cmdParam[10]._workDir,cmdParam[10]._progInput, cmdParam[10]._progOutput);}
-void launchProgram_11() {launchProgram( cmdParam[11]._progPath, cmdParam[11]._progCmd, cmdParam[11]._workDir,cmdParam[11]._progInput, cmdParam[11]._progOutput);}
-void launchProgram_12() {launchProgram( cmdParam[12]._progPath, cmdParam[12]._progCmd, cmdParam[12]._workDir,cmdParam[12]._progInput, cmdParam[12]._progOutput);}
-void launchProgram_13() {launchProgram( cmdParam[13]._progPath, cmdParam[13]._progCmd, cmdParam[13]._workDir,cmdParam[13]._progInput, cmdParam[13]._progOutput);}
-void launchProgram_14() {launchProgram( cmdParam[14]._progPath, cmdParam[14]._progCmd, cmdParam[14]._workDir,cmdParam[14]._progInput, cmdParam[14]._progOutput);}
-void launchProgram_15() {launchProgram( cmdParam[15]._progPath, cmdParam[15]._progCmd, cmdParam[15]._workDir,cmdParam[15]._progInput, cmdParam[15]._progOutput);}
-void launchProgram_16() {launchProgram( cmdParam[16]._progPath, cmdParam[16]._progCmd, cmdParam[16]._workDir,cmdParam[16]._progInput, cmdParam[16]._progOutput);}
-void launchProgram_17() {launchProgram( cmdParam[17]._progPath, cmdParam[17]._progCmd, cmdParam[17]._workDir,cmdParam[17]._progInput, cmdParam[17]._progOutput);}
-void launchProgram_18() {launchProgram( cmdParam[18]._progPath, cmdParam[18]._progCmd, cmdParam[18]._workDir,cmdParam[18]._progInput, cmdParam[18]._progOutput);}
-void launchProgram_19() {launchProgram( cmdParam[19]._progPath, cmdParam[19]._progCmd, cmdParam[19]._workDir,cmdParam[19]._progInput, cmdParam[19]._progOutput);}
+void launchProgram_00() {launchProgram( cmdParam[0] );}
+void launchProgram_01() {launchProgram( cmdParam[1] );}
+void launchProgram_02() {launchProgram( cmdParam[2] );}
+void launchProgram_03() {launchProgram( cmdParam[3] );}
+void launchProgram_04() {launchProgram( cmdParam[4] );}
+void launchProgram_05() {launchProgram( cmdParam[5] );}
+void launchProgram_06() {launchProgram( cmdParam[6] );}
+void launchProgram_07() {launchProgram( cmdParam[7] );}
+void launchProgram_08() {launchProgram( cmdParam[8] );}
+void launchProgram_09() {launchProgram( cmdParam[9] );}
+void launchProgram_10() {launchProgram( cmdParam[10]);}
+void launchProgram_11() {launchProgram( cmdParam[11]);}
+void launchProgram_12() {launchProgram( cmdParam[12]);}
+void launchProgram_13() {launchProgram( cmdParam[13]);}
+void launchProgram_14() {launchProgram( cmdParam[14]);}
+void launchProgram_15() {launchProgram( cmdParam[15]);}
+void launchProgram_16() {launchProgram( cmdParam[16]);}
+void launchProgram_17() {launchProgram( cmdParam[17]);}
+void launchProgram_18() {launchProgram( cmdParam[18]);}
+void launchProgram_19() {launchProgram( cmdParam[19]);}
 
 
 void editCommands()

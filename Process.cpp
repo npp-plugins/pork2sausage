@@ -253,14 +253,11 @@ void Process::listenerStdOut()
 
 void Process::listenerStdErr()
 {
-	//BOOL Result = 0;
-	//DWORD size = 0;
 	DWORD bytesAvail = 0;
 	BOOL result = 0;
 	HANDLE hListenerEvent = ::OpenEvent(EVENT_ALL_ACCESS, FALSE, TEXT("listenerStdErrEvent"));
 
 	int taille = 0;
-	//TCHAR bufferOut[MAX_LINE_LENGTH + 1];
 	TCHAR bufferErr[MAX_LINE_LENGTH + 1];
 
 	int nExitCode = STILL_ACTIVE;
@@ -288,7 +285,6 @@ void Process::listenerStdErr()
 			if ((!result) && (errbytesRead == 0))
 				break;
 		}
-		//outbytesRead = lstrlen(bufferOut);
 		bufferErr[errbytesRead] = '\0';
 		generic_string s;
 		s.assign(bufferErr);
