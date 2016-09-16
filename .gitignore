@@ -9,3 +9,5 @@ bin
 *.lib
 *.suo
 *.sln
+*.zip
+vs.proj/pork2sausage.vcxproj.user
