@@ -90,6 +90,7 @@ extern "C" __declspec(dllexport) void setInfo(NppData notpadPlusData)
 {
 	nppData = notpadPlusData;
 	TCHAR confDir[MAX_PATH];
+	confDir[0] = '\0';
 	::SendMessage(nppData._nppHandle, NPPM_GETPLUGINSCONFIGDIR, MAX_PATH, (LPARAM)confDir);
 	confPath = confDir;
 	confPath += TEXT("\\pork2Sausage.ini");
@@ -191,10 +192,10 @@ HWND getCurrentScintillaHandle() {
 	return (currentEdit == 0)?nppData._scintillaMainHandle:nppData._scintillaSecondHandle;
 };
 
-int getCmdsFromConf(const TCHAR *confPath, CmdParam *cmdParam, int /*maxNbCmd*/)
+int getCmdsFromConf(const TCHAR *confPathValue, CmdParam *cmdParamValue, int /*maxNbCmd*/)
 {
 	TCHAR cmdNames[MAX_PATH];
-	::GetPrivateProfileSectionNames(cmdNames, MAX_PATH, confPath);
+	::GetPrivateProfileSectionNames(cmdNames, MAX_PATH, confPathValue);
 	TCHAR *pFn = cmdNames;
 
 	int i = 0;
@@ -204,28 +205,28 @@ int getCmdsFromConf(const TCHAR *confPath, CmdParam *cmdParam, int /*maxNbCmd*/)
         TCHAR progCmd[1024];
         TCHAR workDir[1024];
 
-		GetPrivateProfileString(pFn, TEXT("progPath"), TEXT(""), progPath, 1024, confPath);
-        GetPrivateProfileString(pFn, TEXT("progCmd"), TEXT(""), progCmd, 1024, confPath);
-        GetPrivateProfileString(pFn, TEXT("workDir"), TEXT(""), workDir, 1024, confPath);
+		GetPrivateProfileString(pFn, TEXT("progPath"), TEXT(""), progPath, 1024, confPathValue);
+        GetPrivateProfileString(pFn, TEXT("progCmd"), TEXT(""), progCmd, 1024, confPathValue);
+        GetPrivateProfileString(pFn, TEXT("workDir"), TEXT(""), workDir, 1024, confPathValue);
 
 		if (progPath[0] && progCmd[0] && workDir[0])
 		{
-			lstrcpy(cmdParam[i]._cmdName, pFn);
-            lstrcpy(cmdParam[i]._progPath, progPath);
-            lstrcpy(cmdParam[i]._progCmd, progCmd);
-            lstrcpy(cmdParam[i]._workDir, workDir);
+			lstrcpy(cmdParamValue[i]._cmdName, pFn);
+            lstrcpy(cmdParamValue[i]._progPath, progPath);
+            lstrcpy(cmdParamValue[i]._progCmd, progCmd);
+            lstrcpy(cmdParamValue[i]._workDir, workDir);
 
             // optional parameter here
 			TCHAR progInput[1024];
             TCHAR progOutput[1024];
             TCHAR replaceSelection[8];
-			GetPrivateProfileString(pFn, TEXT("progInput"), TEXT(""), progInput, 1024, confPath);
-            GetPrivateProfileString(pFn, TEXT("progOutput"), TEXT(""), progOutput, 1024, confPath);
-            GetPrivateProfileString(pFn, TEXT("replaceSelection"), TEXT("true"), replaceSelection, 8, confPath);
-            lstrcpy(cmdParam[i]._progInput, progInput);
-            lstrcpy(cmdParam[i]._progOutput, progOutput);
+			GetPrivateProfileString(pFn, TEXT("progInput"), TEXT(""), progInput, 1024, confPathValue);
+            GetPrivateProfileString(pFn, TEXT("progOutput"), TEXT(""), progOutput, 1024, confPathValue);
+            GetPrivateProfileString(pFn, TEXT("replaceSelection"), TEXT("true"), replaceSelection, 8, confPathValue);
+            lstrcpy(cmdParamValue[i]._progInput, progInput);
+            lstrcpy(cmdParamValue[i]._progOutput, progOutput);
             if (generic_stricmp(TEXT("false"), replaceSelection) == 0)
-                cmdParam[i]._doReplaceSelection = false;
+                cmdParamValue[i]._doReplaceSelection = false;
 			i++;
 		}
 
@@ -250,14 +251,14 @@ void replaceStr(generic_string & str, generic_string str2BeReplaced, generic_str
 		str.replace(pos, str2BeReplaced.length(), replacement);
 };
 
-void launchProgram(const CmdParam & cmdParam)
+void launchProgram(const CmdParam & cmdParamValue)
 {
-    const TCHAR *programPath = cmdParam._progPath; 
-    const TCHAR *param = cmdParam._progCmd;
-    const TCHAR *programDir = cmdParam._workDir;
-    const TCHAR *progInput = cmdParam._progInput;
-    const TCHAR *progOutput = cmdParam._progOutput;
-    bool doReplace = cmdParam._doReplaceSelection;
+    const TCHAR *programPath = cmdParamValue._progPath; 
+    const TCHAR *param = cmdParamValue._progCmd;
+    const TCHAR *programDir = cmdParamValue._workDir;
+    const TCHAR *progInput = cmdParamValue._progInput;
+    const TCHAR *progOutput = cmdParamValue._progOutput;
+    bool doReplace = cmdParamValue._doReplaceSelection;
 
 	HWND hCurrScintilla = getCurrentScintillaHandle();
 

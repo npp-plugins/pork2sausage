@@ -96,9 +96,9 @@ struct CmdParam {
 
 
 
-void launchProgram(const CmdParam & cmdParam);
+void launchProgram(const CmdParam & cmdParamValue);
 
-int getCmdsFromConf(const TCHAR *confPath, CmdParam *cmdParam, int maxNbCmd);
+int getCmdsFromConf(const TCHAR *confPathValue, CmdParam *cmdParamValue, int maxNbCmd);
 
 void launchProgram_00();
 void launchProgram_01();
