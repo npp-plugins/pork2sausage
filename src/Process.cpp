@@ -194,6 +194,7 @@ void Process::listenerStdOut()
 	//FILE *fp = NULL;
 
 	int taille = 0;
+	bool outstandingIO = false;
 	char bufferOut[MAX_LINE_LENGTH + 1];
 	//TCHAR bufferErr[MAX_LINE_LENGTH + 1];
 
@@ -208,7 +209,8 @@ void Process::listenerStdOut()
 		memset(bufferOut, 0x00, MAX_LINE_LENGTH + 1); 
 		//memset(bufferErr,0x00,MAX_LINE_LENGTH + 1);
 		taille = sizeof(bufferOut) - sizeof(char);
-		
+		outstandingIO = false;
+
 		Sleep(50);
 
 		if (!::PeekNamedPipe(_hPipeOutR, bufferOut, taille, &outbytesRead, &bytesAvail, NULL)) 
@@ -217,25 +219,35 @@ void Process::listenerStdOut()
 			break;
 		}
 
-		if(outbytesRead)
+		if (outbytesRead)
 		{
-			result = :: ReadFile(_hPipeOutR, bufferOut, taille, &outbytesRead, NULL);
-			if ((!result) && (outbytesRead == 0))
+			result = ::ReadFile(_hPipeOutR, bufferOut, taille, &outbytesRead, NULL);
+
+			// From ReadFile documentation:
+			// When a synchronous read operation reaches the end of a file,
+			// ReadFile returns TRUE and sets *lpNumberOfBytesRead to zero.
+			if (!result)
+				break;
+
+			outstandingIO = (outbytesRead > 0);
+
+			if (!outstandingIO)
 				break;
 		}
+
 		//outbytesRead = lstrlen(bufferOut);
 		bufferOut[outbytesRead] = '\0';
 #ifdef UNICODE
-        std::string inputA = bufferOut;
-        std::wstring s(inputA.begin(), inputA.end());
-        s.assign(inputA.begin(), inputA.end());
+		std::string inputA = bufferOut;
+		std::wstring s(inputA.begin(), inputA.end());
+		s.assign(inputA.begin(), inputA.end());
 
 #else
         std::string s = bufferOut;
 #endif
 		_stdoutStr += s;
 
-		if (::GetExitCodeProcess(_hProcess, (unsigned long*)&nExitCode))
+		if (!outstandingIO && ::GetExitCodeProcess(_hProcess, (unsigned long*)&nExitCode))
 		{
 			if (nExitCode != STILL_ACTIVE)
 				break; // EOF condition
@@ -258,7 +270,9 @@ void Process::listenerStdErr()
 	HANDLE hListenerEvent = ::OpenEvent(EVENT_ALL_ACCESS, FALSE, TEXT("listenerStdErrEvent"));
 
 	int taille = 0;
-	TCHAR bufferErr[MAX_LINE_LENGTH + 1];
+	bool outstandingIO = false;
+	char bufferErr[MAX_LINE_LENGTH + 1];
+	//TCHAR bufferErr[MAX_LINE_LENGTH + 1];
 
 	int nExitCode = STILL_ACTIVE;
 	
@@ -269,7 +283,8 @@ void Process::listenerStdErr()
 	for(;;)
 	{ // got data
 		memset(bufferErr, 0x00, MAX_LINE_LENGTH + 1);
-		taille = sizeof(bufferErr) - sizeof(TCHAR);
+		taille = sizeof(bufferErr) - sizeof(char);
+		outstandingIO = false;
 
 		Sleep(50);
 
@@ -282,15 +297,31 @@ void Process::listenerStdErr()
 		if(errbytesRead)
 		{
 			result = :: ReadFile(_hPipeErrR, bufferErr, taille, &errbytesRead, NULL);
-			if ((!result) && (errbytesRead == 0))
+
+			// From ReadFile documentation:
+			// When a synchronous read operation reaches the end of a file,
+			// ReadFile returns TRUE and sets *lpNumberOfBytesRead to zero.
+			if (!result)
+				break;
+
+			outstandingIO = (errbytesRead > 0);
+
+			if (!outstandingIO)
 				break;
 		}
+
 		bufferErr[errbytesRead] = '\0';
-		generic_string s;
-		s.assign(bufferErr);
+#ifdef UNICODE
+		std::string errA = bufferErr;
+		std::wstring s(errA.begin(), errA.end());
+		s.assign(errA.begin(), errA.end());
+
+#else
+		std::string s = bufferErr;
+#endif
 		_stderrStr += s;
 
-		if (::GetExitCodeProcess(_hProcess, (unsigned long*)&nExitCode))
+		if (!outstandingIO && ::GetExitCodeProcess(_hProcess, (unsigned long*)&nExitCode))
 		{
 			if (nExitCode != STILL_ACTIVE)
 				break; // EOF condition
