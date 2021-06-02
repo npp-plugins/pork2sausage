@@ -103,19 +103,10 @@ extern "C" __declspec(dllexport) void setInfo(NppData notpadPlusData)
 	nbFunc += getCmdsFromConf(confPath.c_str(), cmdParam, maxNbCmd);
 }
 
-
-
 extern "C" __declspec(dllexport) const TCHAR * getName()
 {
 	return PLUGIN_NAME;
 }
-/*
-extern "C" __declspec(dllexport) FuncItem * getFuncsArray(int *nbF)
-{
-	*nbF = nbFunc;
-	return funcItem;
-}
-*/
 
 extern "C" __declspec(dllexport) FuncItem * getFuncsArray(int *nbF)
 {
@@ -272,12 +263,12 @@ void launchProgram(const CmdParam & cmdParamValue)
 	}
 
 	size_t asciiTextLen = end - start;
-    if (asciiTextLen == 0) return;
-
-    char * pAsciiText = new char[asciiTextLen+1];
-    
-    ::SendMessage(hCurrScintilla, SCI_GETSELTEXT, 0, (LPARAM)pAsciiText);
-
+	char * pAsciiText = "";
+	if (asciiTextLen > 0)
+	{
+		pAsciiText = new char[asciiTextLen + 1];
+		::SendMessage(hCurrScintilla, SCI_GETSELTEXT, 0, (LPARAM)pAsciiText);
+	}
     TCHAR newProgramDir[MAX_PATH];
     lstrcpy(newProgramDir, programPath);
     ::PathRemoveFileSpec(newProgramDir);
@@ -290,14 +281,11 @@ void launchProgram(const CmdParam & cmdParamValue)
     generic_string selectedText = TEXT("\"");
 
 //todo : convert from correct encoding
-#ifdef UNICODE
     std::string inputA = pAsciiText;
     std::wstring inputW(inputA.begin(), inputA.end());
     inputW.assign(inputA.begin(), inputA.end());
     selectedText += inputW;
-#else
-    selectedText += pAsciiText;
-#endif
+
     selectedText += TEXT("\"");
 
     const int temBufLen = 32;
@@ -385,15 +373,11 @@ void launchProgram(const CmdParam & cmdParamValue)
         // otherwise, we look in stdout
         else if (program.hasStdout() && doReplace)
         {
-            
-#ifdef UNICODE
             std::wstring outputW = program.getStdout();
             std::string output(outputW.begin(), outputW.end());
             output.assign(outputW.begin(), outputW.end());
             pOutput = output.c_str();
-#else
-            pOutput = program.getStdout();
-#endif
+
             ::SendMessage(hCurrScintilla, SCI_REPLACESEL, 0, (LPARAM)pOutput);
 	        ::SendMessage(hCurrScintilla, SCI_SETSEL, start, start+strlen(pOutput));
         }
@@ -407,7 +391,9 @@ void launchProgram(const CmdParam & cmdParamValue)
     {
         ::MessageBox(NULL, program.getStderr(), TEXT("Error"), MB_OK);
     }
-	delete [] pAsciiText;
+
+	if (asciiTextLen > 0)
+		delete [] pAsciiText;
 }
 
 BOOL CALLBACK dlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM /*lParam*/) 
@@ -454,7 +440,7 @@ void editCommands()
 {
 	if (!::PathFileExists(confPath.c_str()))
 	{
-		generic_string msg = confPath + TEXT("is not present.\\rPlease create this file manually.");
+		generic_string msg = confPath + TEXT("is not present.\rPlease create this file manually.");
 		::MessageBox(nppData._nppHandle, msg.c_str(), TEXT("Configuration file is absent"), MB_OK);
 		return;
 	}
