@@ -1,5 +1,5 @@
 //this file is part of Notepad++ plugin Pork2Sausage
-//Copyright (C)2010 Don HO <donho@altern.org>
+//Copyright (C)2022 Don HO <don.h@free.fr>
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -25,8 +25,10 @@
 #include "PluginInterface.h"
 #include "Pork2Sausage.h"
 #include "Process.h"
+#include <locale>
 #include <shlwapi.h>
 #include <time.h>
+#include <algorithm>
 
 const TCHAR PLUGIN_NAME[] = TEXT("Pork to Sausage");
 
@@ -263,7 +265,7 @@ void launchProgram(const CmdParam & cmdParamValue)
 	}
 
 	size_t asciiTextLen = end - start;
-	char * pAsciiText = "";
+	char * pAsciiText = nullptr;
 	if (asciiTextLen > 0)
 	{
 		pAsciiText = new char[asciiTextLen + 1];
@@ -281,9 +283,12 @@ void launchProgram(const CmdParam & cmdParamValue)
     generic_string selectedText = TEXT("\"");
 
 //todo : convert from correct encoding
-    std::string inputA = pAsciiText;
-    std::wstring inputW(inputA.begin(), inputA.end());
-    inputW.assign(inputA.begin(), inputA.end());
+    std::string inputA = pAsciiText ? pAsciiText : "";
+    std::wstring inputW;
+	std::transform(inputA.begin(), inputA.end(), std::back_inserter(inputW), [](char c) {
+		return (wchar_t)c;
+	});
+
     selectedText += inputW;
 
     selectedText += TEXT("\"");
@@ -374,8 +379,12 @@ void launchProgram(const CmdParam & cmdParamValue)
         else if (program.hasStdout() && doReplace)
         {
             std::wstring outputW = program.getStdout();
-            std::string output(outputW.begin(), outputW.end());
-            output.assign(outputW.begin(), outputW.end());
+			std::string output;
+			std::transform(outputW.begin(), outputW.end(), std::back_inserter(output), [](wchar_t c) {
+				return (char)c;
+				}
+			);
+
             pOutput = output.c_str();
 
             ::SendMessage(hCurrScintilla, SCI_REPLACESEL, 0, (LPARAM)pOutput);

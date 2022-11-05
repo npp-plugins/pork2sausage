@@ -1,5 +1,5 @@
 //this file is part of Notepad++ plugin Pork2Sausage
-//Copyright (C)2010 Don HO <donho@altern.org>
+//Copyright (C)2022 Don HO <don.h@free.fr>
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
