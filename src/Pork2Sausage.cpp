@@ -1,6 +1,6 @@
 //this file is part of Notepad++ plugin Pork2Sausage
 //Copyright (C)2022 Don HO <don.h@free.fr>
-//
+//Code changed by Amar on 2023 Oct 05
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
 //as published by the Free Software Foundation; either
