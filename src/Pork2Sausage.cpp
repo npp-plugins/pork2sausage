@@ -38,7 +38,7 @@ int nbFunc = NB_BASE_CMD; // "Edit Commands" & "About"
 HINSTANCE _hInst;
 NppData nppData;
 FuncItem *funcItem;
-generic_string confPath;
+TCHAR confPath[MAX_PATH] {};
 const int maxNbCmd = 20;
 CmdParam cmdParam[maxNbCmd];
 
@@ -91,18 +91,31 @@ BOOL APIENTRY DllMain( HANDLE hModule, DWORD  reasonForCall, LPVOID /*lpReserved
 extern "C" __declspec(dllexport) void setInfo(NppData notpadPlusData)
 {
 	nppData = notpadPlusData;
-	TCHAR confDir[MAX_PATH];
-	confDir[0] = '\0';
-	::SendMessage(nppData._nppHandle, NPPM_GETPLUGINSCONFIGDIR, MAX_PATH, (LPARAM)confDir);
-	confPath = confDir;
-	confPath += TEXT("\\pork2Sausage.ini");
+
+	::SendMessage(nppData._nppHandle, NPPM_GETPLUGINSCONFIGDIR, MAX_PATH, (LPARAM)confPath);
+	PathAppend(confPath, _T("\\pork2Sausage.ini"));
 	
-	if (!::PathFileExists(confPath.c_str()))
+	if (!::PathFileExists(confPath))
 	{
-		generic_string msg = confPath + TEXT(" is absent.");
-		::MessageBox(nppData._nppHandle, confPath.c_str(), TEXT("Not present"), MB_OK);
+		// pork2Sausage.ini not in %APPDATA%\Notepad++\plugins\Config\ - it will be copied in it if we find it beside of plugin binary
+		wchar_t moduleDirName[MAX_PATH] = _T("pork2sausage");
+		wchar_t moduleConfFilePath[MAX_PATH]{};
+		::SendMessage(nppData._nppHandle, NPPM_GETPLUGINHOMEPATH, MAX_PATH, (LPARAM)moduleConfFilePath);
+		::PathAppend(moduleConfFilePath, moduleDirName);
+		::PathAppend(moduleConfFilePath, _T("Config"));
+		::PathAppend(moduleConfFilePath, _T("pork2sausage.ini"));
+		if (::PathFileExists(moduleConfFilePath))
+		{
+			::CopyFile(moduleConfFilePath, confPath, TRUE);
+		}
+		else
+		{
+			generic_string msg = confPath;
+			msg += TEXT(" is absent.\rPlease create the file for avoiding this message.");
+			::MessageBox(nppData._nppHandle, msg.c_str(), _T("Configuration file is missing"), MB_OK);
+		}
 	}
-	nbFunc += getCmdsFromConf(confPath.c_str(), cmdParam, maxNbCmd);
+	nbFunc += getCmdsFromConf(confPath, cmdParam, maxNbCmd);
 }
 
 extern "C" __declspec(dllexport) const TCHAR * getName()
@@ -447,13 +460,14 @@ void launchProgram_19() {launchProgram( cmdParam[19]);}
 
 void editCommands()
 {
-	if (!::PathFileExists(confPath.c_str()))
+	if (!::PathFileExists(confPath))
 	{
-		generic_string msg = confPath + TEXT("is not present.\rPlease create this file manually.");
+		generic_string msg = confPath;
+		msg += TEXT(" is not present.\rPlease create this file manually.");
 		::MessageBox(nppData._nppHandle, msg.c_str(), TEXT("Configuration file is absent"), MB_OK);
 		return;
 	}
-	::SendMessage(nppData._nppHandle, NPPM_DOOPEN, 0, (LPARAM)confPath.c_str());
+	::SendMessage(nppData._nppHandle, NPPM_DOOPEN, 0, (LPARAM)confPath);
 }
 
 
