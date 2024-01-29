@@ -74,7 +74,7 @@
 typedef std::basic_string<TCHAR> generic_string;
 
 struct CmdParam {
-	TCHAR _cmdName[nbChar];
+	TCHAR _cmdName[menuItemSize];
 	PFUNCPLUGINCMD _pMainFunc;
 	TCHAR _progPath[1024];
     TCHAR _progCmd[1024];
