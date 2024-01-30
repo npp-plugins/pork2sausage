@@ -37,7 +37,7 @@ int nbFunc = NB_BASE_CMD; // "Edit Commands" & "About"
 
 HINSTANCE _hInst;
 NppData nppData;
-FuncItem *funcItem;
+FuncItem* funcItem;
 TCHAR confPath[MAX_PATH] {};
 const int maxNbCmd = 20;
 CmdParam cmdParam[maxNbCmd];
@@ -95,9 +95,10 @@ extern "C" __declspec(dllexport) void setInfo(NppData notpadPlusData)
 	::SendMessage(nppData._nppHandle, NPPM_GETPLUGINSCONFIGDIR, MAX_PATH, (LPARAM)confPath);
 	PathAppend(confPath, _T("\\pork2Sausage.ini"));
 	
-	if (!::PathFileExists(confPath))
+	if (!::PathFileExists(confPath)) // pork2Sausage.ini not in %APPDATA%\Notepad++\plugins\Config\ directory
 	{
-		// pork2Sausage.ini not in %APPDATA%\Notepad++\plugins\Config\ - it will be copied in it if we find it beside of plugin binary
+		// conf file will be copied in conf dir if we find the file beside of plugin binary
+
 		wchar_t moduleDirName[MAX_PATH] = _T("pork2sausage");
 		wchar_t moduleConfFilePath[MAX_PATH]{};
 		::SendMessage(nppData._nppHandle, NPPM_GETPLUGINHOMEPATH, MAX_PATH, (LPARAM)moduleConfFilePath);
@@ -185,7 +186,7 @@ extern "C" __declspec(dllexport) BOOL isUnicode()
 // Here you can process the Npp Messages 
 // I will make the messages accessible little by little, according to the need of plugin development.
 // Please let me know if you need to access to some messages :
-// http://sourceforge.net/forum/forum.php?forum_id=482781
+// https://github.com/notepad-plus-plus/notepad-plus-plus/issues
 //
 extern "C" __declspec(dllexport) LRESULT messageProc(UINT /*Message*/, WPARAM /*wParam*/, LPARAM /*lParam*/)
 {
@@ -241,13 +242,6 @@ int getCmdsFromConf(const TCHAR *confPathValue, CmdParam *cmdParamValue, int /*m
 	
 	return i;
 }
-
-struct commandParam
-{
-    generic_string _prgramPath;
-    generic_string _param;
-    generic_string _prgramDir;
-};
 
 void replaceStr(generic_string & str, generic_string str2BeReplaced, generic_string replacement)
 {
