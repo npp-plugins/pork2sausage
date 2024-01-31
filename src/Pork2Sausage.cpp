@@ -208,9 +208,9 @@ int getCmdsFromConf(const TCHAR *confPathValue, CmdParam *cmdParamValue, int /*m
 	int i = 0;
 	while (*pFn)
 	{
-		TCHAR progPath[1024];
-        TCHAR progCmd[1024];
-        TCHAR workDir[1024];
+		TCHAR progPath[1024] {};
+		TCHAR progCmd[1024] {};
+		TCHAR workDir[1024] {};
 
 		GetPrivateProfileString(pFn, TEXT("progPath"), TEXT(""), progPath, 1024, confPathValue);
         GetPrivateProfileString(pFn, TEXT("progCmd"), TEXT(""), progCmd, 1024, confPathValue);
@@ -379,7 +379,7 @@ void launchProgram(const CmdParam & cmdParamValue)
             }
             else
             {
-                ::MessageBox(NULL, TEXT("The file is invalide"), progOutputStr.c_str(), MB_OK);
+                ::MessageBox(NULL, TEXT("The file is invalid"), progOutputStr.c_str(), MB_OK);
             }
         }
         // otherwise, we look in stdout
