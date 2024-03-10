@@ -205,23 +205,43 @@ int getCmdsFromConf(const TCHAR *confPathValue, CmdParam *cmdParamValue, int /*m
 	::GetPrivateProfileSectionNames(cmdNames, MAX_PATH, confPathValue);
 	TCHAR *pFn = cmdNames;
 
+	TCHAR nppConfigDir[1024];
+	::SendMessage(nppData._nppHandle, NPPM_GETPLUGINSCONFIGDIR, 1024, (LPARAM)nppConfigDir);
+
 	int i = 0;
 	while (*pFn)
 	{
-		TCHAR progPath[1024] {};
+		TCHAR progPath1[1024] {};
+		TCHAR progPath2[1024] {};
 		TCHAR progCmd[1024] {};
-		TCHAR workDir[1024] {};
+		TCHAR workDir1[1024] {};
+		TCHAR workDir2[1024] {};
 
-		GetPrivateProfileString(pFn, TEXT("progPath"), TEXT(""), progPath, 1024, confPathValue);
+		GetPrivateProfileString(pFn, TEXT("progPath"), TEXT(""), progPath1, 1024, confPathValue);
         GetPrivateProfileString(pFn, TEXT("progCmd"), TEXT(""), progCmd, 1024, confPathValue);
-        GetPrivateProfileString(pFn, TEXT("workDir"), TEXT(""), workDir, 1024, confPathValue);
+        GetPrivateProfileString(pFn, TEXT("workDir"), TEXT(""), workDir1, 1024, confPathValue);
 
-		if (progPath[0] && progCmd[0] && workDir[0])
+		if (progPath1[0] && progCmd[0] && workDir1[0])
 		{
+			::ExpandEnvironmentStrings(progPath1, progPath2, 1024);
+            ::ExpandEnvironmentStrings(workDir1, workDir2, 1024);
+
+            if (::PathIsRelative(progPath2))
+            {
+              ::PathCombine(progPath1, nppConfigDir, progPath2);
+              ::GetFullPathName(progPath1, 1024, progPath2, NULL);
+            }
+
+            if (::PathIsRelative(workDir2))
+            {
+              ::PathCombine(workDir1, nppConfigDir, workDir2);
+              ::GetFullPathName(workDir1, 1024, workDir2, NULL);
+            }
+
 			lstrcpy(cmdParamValue[i]._cmdName, pFn);
-            lstrcpy(cmdParamValue[i]._progPath, progPath);
+            lstrcpy(cmdParamValue[i]._progPath, progPath2);
             lstrcpy(cmdParamValue[i]._progCmd, progCmd);
-            lstrcpy(cmdParamValue[i]._workDir, workDir);
+            lstrcpy(cmdParamValue[i]._workDir, workDir2);
 
             // optional parameter here
 			TCHAR progInput[1024];
