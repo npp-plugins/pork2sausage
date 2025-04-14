@@ -307,7 +307,6 @@ void launchProgram(const CmdParam & cmdParamValue)
     generic_string paramInput = param;
     generic_string progInputStr = progInput?progInput:TEXT("");
     generic_string progOutputStr = progOutput?progOutput:TEXT("");
-    generic_string selectedText = TEXT("\"");
 
 //todo : convert from correct encoding
     std::string inputA = pAsciiText ? pAsciiText : "";
@@ -316,9 +315,8 @@ void launchProgram(const CmdParam & cmdParamValue)
 		return (wchar_t)c;
 	});
 
-    selectedText += inputW;
-
-    selectedText += TEXT("\"");
+    generic_string selectedText = inputW;
+	generic_string quotedSelectedText = TEXT("\"") + selectedText + TEXT("\"");
 
     const int temBufLen = 32;
 	TCHAR tmpbuf[temBufLen];
@@ -331,7 +329,7 @@ void launchProgram(const CmdParam & cmdParamValue)
 	generic_string timeStampString = tmpbuf;
 
     replaceStr(paramInput, TEXT("$(TIMESTAMP)"), timeStampString);
-    replaceStr(paramInput, TEXT("$(SELECTION)"), selectedText);
+    replaceStr(paramInput, TEXT("$(SELECTION)"), quotedSelectedText);
     if (progInputStr != TEXT(""))
     {
         replaceStr(progInputStr, TEXT("$(TIMESTAMP)"), timeStampString);
