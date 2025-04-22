@@ -12,6 +12,10 @@ vs.proj/pork2sausage.opensdf
 vs.proj/pork2sausage.exp
 vs.proj/pork2sausage.lib
 vs.proj/pork2sausage.vcxproj.user
+vs.proj/pork2sausage/x64/Debug
+vs.proj/pork2sausage/Debug
+vs.proj/pork2sausage/Release
+vs.proj/pork2sausage/x64/Release
 vs.proj/.vs/
 *.aps
 *.zip

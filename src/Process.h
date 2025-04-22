@@ -1,5 +1,5 @@
 //this file is part of notepad++
-//Copyright (C)2022 Don HO <don.h@free.fr>
+//Copyright (C)2025 Don HO <don.h@free.fr>
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -21,7 +21,6 @@
 #include <windows.h>
 #include <string>
 
-typedef std::basic_string<TCHAR> generic_string;
 
 enum progType {WIN32_PROG, CONSOLE_PROG};
 
@@ -30,19 +29,19 @@ class Process
 {
 public:
     Process(progType pt = WIN32_PROG) : _type(pt) {};
-    Process(const TCHAR *cmd, const TCHAR *args, const TCHAR *cDir, progType pt = WIN32_PROG)
-		: _type(pt), _stdoutStr(TEXT("")), _stderrStr(TEXT("")), _hPipeOutR(NULL),
+    Process(const wchar_t* cmd, const wchar_t* args, const wchar_t* cDir, progType pt = WIN32_PROG)
+		: _type(pt), _stdoutStr(L""), _stderrStr(L""), _hPipeOutR(NULL),
 		_hPipeErrR(NULL), _hProcess(NULL), _hProcessThread(NULL),
 		_command(cmd), _args(args), _curDir(cDir), _bProcessEnd(TRUE)
 	{};
 
 	BOOL run();
 
-	const TCHAR * getStdout() const {
+	const wchar_t * getStdout() const {
 		return _stdoutStr.c_str();
 	};
 	
-	const TCHAR * getStderr() const {
+	const wchar_t * getStderr() const {
 		return _stderrStr.c_str();
 	};
 
@@ -51,24 +50,24 @@ public:
 	};
 
 	bool hasStdout() {
-		return (_stdoutStr.compare(TEXT("")) != 0);
+		return (_stdoutStr.compare(L"") != 0);
 	};
 
 	bool hasStderr() {
-		return (_stderrStr.compare(TEXT("")) != 0);
+		return (_stderrStr.compare(L"") != 0);
 	};
  
 protected:
     progType _type;
 
 	// LES ENTREES
-    generic_string _command;
-	generic_string _args;
-	generic_string _curDir;
+    std::wstring _command;
+	std::wstring _args;
+	std::wstring _curDir;
 	
 	// LES SORTIES
-	generic_string _stdoutStr;
-	generic_string _stderrStr;
+	std::wstring _stdoutStr;
+	std::wstring _stderrStr;
 	int _exitCode;
 
 	// LES HANDLES
@@ -98,7 +97,7 @@ protected:
 	void listenerStdErr();
 	void waitForProcessEnd();
 
-	void error(const TCHAR *txt2display, BOOL & returnCode, int errCode);
+	void error(const wchar_t* txt2display, BOOL & returnCode, int errCode);
 };
 
 #endif //PROCESSUS_H

@@ -1,5 +1,5 @@
 /*
- Copyright 2022 Don HO <don.h@free.fr>
+ Copyright 2025 Don HO <don.h@free.fr>
 
  This file is part of Notepad++ plugin Pork2Sausage.
 
@@ -41,7 +41,7 @@ BEGIN
 			VALUE	"FileDescription",	"Pork to sausage plugin for Notepad++\0"
 			VALUE	"FileVersion",	VERSION_VALUE
 			VALUE	"InternalName",	"pork2sausage.dll\0"
-			VALUE	"LegalCopyright",	"Copyright 2010 by Don HO\0"
+			VALUE	"LegalCopyright",	"Copyright 2025 by Don HO\0"
 			VALUE	"OriginalFilename",	"pork2sausage.dll\0"
 			VALUE	"ProductName",	"Pork to sausage\0"
 			VALUE	"ProductVersion",	VERSION_VALUE

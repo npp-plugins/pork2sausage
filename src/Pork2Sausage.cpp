@@ -1,5 +1,5 @@
 //this file is part of Notepad++ plugin Pork2Sausage
-//Copyright (C)2024 Don HO <don.h@free.fr>
+//Copyright (C)2025 Don HO <don.h@free.fr>
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -18,8 +18,6 @@
 #include <string>
 #include <iostream>
 #include <fstream>
-//#include <ios>
-//#include <ifstream>
 
 #include <vector>
 #include "PluginInterface.h"
@@ -30,7 +28,7 @@
 #include <time.h>
 #include <algorithm>
 
-const TCHAR PLUGIN_NAME[] = TEXT("Pork to Sausage");
+const wchar_t PLUGIN_NAME[] = L"Pork to Sausage";
 
 #define NB_BASE_CMD 2
 int nbFunc = NB_BASE_CMD; // "Edit Commands" & "About"
@@ -38,7 +36,7 @@ int nbFunc = NB_BASE_CMD; // "Edit Commands" & "About"
 HINSTANCE _hInst;
 NppData nppData;
 FuncItem* funcItem;
-TCHAR confPath[MAX_PATH] {};
+wchar_t confPath[MAX_PATH] {};
 const int maxNbCmd = 20;
 CmdParam cmdParam[maxNbCmd];
 
@@ -93,33 +91,33 @@ extern "C" __declspec(dllexport) void setInfo(NppData notpadPlusData)
 	nppData = notpadPlusData;
 
 	::SendMessage(nppData._nppHandle, NPPM_GETPLUGINSCONFIGDIR, MAX_PATH, (LPARAM)confPath);
-	PathAppend(confPath, _T("\\pork2Sausage.ini"));
+	PathAppend(confPath, L"\\pork2Sausage.ini");
 	
 	if (!::PathFileExists(confPath)) // pork2Sausage.ini not in %APPDATA%\Notepad++\plugins\Config\ directory
 	{
 		// conf file will be copied in conf dir if we find the file beside of plugin binary
 
-		wchar_t moduleDirName[MAX_PATH] = _T("pork2sausage");
+		wchar_t moduleDirName[MAX_PATH] = L"pork2sausage";
 		wchar_t moduleConfFilePath[MAX_PATH]{};
 		::SendMessage(nppData._nppHandle, NPPM_GETPLUGINHOMEPATH, MAX_PATH, (LPARAM)moduleConfFilePath);
 		::PathAppend(moduleConfFilePath, moduleDirName);
-		::PathAppend(moduleConfFilePath, _T("Config"));
-		::PathAppend(moduleConfFilePath, _T("pork2sausage.ini"));
+		::PathAppend(moduleConfFilePath, L"Config");
+		::PathAppend(moduleConfFilePath, L"pork2sausage.ini");
 		if (::PathFileExists(moduleConfFilePath))
 		{
 			::CopyFile(moduleConfFilePath, confPath, TRUE);
 		}
 		else
 		{
-			generic_string msg = confPath;
-			msg += TEXT(" is absent.\rPlease create the file for avoiding this message.");
-			::MessageBox(nppData._nppHandle, msg.c_str(), _T("Configuration file is missing"), MB_OK);
+			std::wstring msg = confPath;
+			msg += L" is absent.\rPlease create the file for avoiding this message.";
+			::MessageBox(nppData._nppHandle, msg.c_str(), L"Configuration file is missing", MB_OK);
 		}
 	}
 	nbFunc += getCmdsFromConf(confPath, cmdParam, maxNbCmd);
 }
 
-extern "C" __declspec(dllexport) const TCHAR * getName()
+extern "C" __declspec(dllexport) const wchar_t* getName()
 {
 	return PLUGIN_NAME;
 }
@@ -150,7 +148,7 @@ extern "C" __declspec(dllexport) FuncItem * getFuncsArray(int *nbF)
 	if (insertSeparator)
 	{
 		funcItem[i]._pFunc = NULL;
-		lstrcpy(funcItem[i]._itemName, TEXT("-SEPARATOR-"));
+		lstrcpy(funcItem[i]._itemName, L"-SEPARATOR-");
 		funcItem[i]._init2Check = false;
 		funcItem[i]._pShKey = NULL;
 		i++;
@@ -158,14 +156,14 @@ extern "C" __declspec(dllexport) FuncItem * getFuncsArray(int *nbF)
 
 	// Edit Commands
 	funcItem[i]._pFunc = editCommands;
-	lstrcpy(funcItem[i]._itemName, TEXT("Edit User Commands"));
+	lstrcpy(funcItem[i]._itemName, L"Edit User Commands");
 	funcItem[i]._init2Check = false;
 	funcItem[i]._pShKey = NULL;
 	i++;
 
 	// About
 	funcItem[i]._pFunc = about;
-	lstrcpy(funcItem[i]._itemName, TEXT("About"));
+	lstrcpy(funcItem[i]._itemName, L"About");
 	funcItem[i]._init2Check = false;
 	funcItem[i]._pShKey = NULL;
 
@@ -199,27 +197,27 @@ HWND getCurrentScintillaHandle() {
 	return (currentEdit == 0)?nppData._scintillaMainHandle:nppData._scintillaSecondHandle;
 };
 
-int getCmdsFromConf(const TCHAR *confPathValue, CmdParam *cmdParamValue, int /*maxNbCmd*/)
+int getCmdsFromConf(const wchar_t *confPathValue, CmdParam *cmdParamValue, int /*maxNbCmd*/)
 {
-	TCHAR cmdNames[MAX_PATH];
+	wchar_t cmdNames[MAX_PATH];
 	::GetPrivateProfileSectionNames(cmdNames, MAX_PATH, confPathValue);
-	TCHAR *pFn = cmdNames;
+	wchar_t* pFn = cmdNames;
 
-	TCHAR nppConfigDir[1024];
+	wchar_t nppConfigDir[1024];
 	::SendMessage(nppData._nppHandle, NPPM_GETPLUGINSCONFIGDIR, 1024, (LPARAM)nppConfigDir);
 
 	int i = 0;
 	while (*pFn)
 	{
-		TCHAR progPath1[1024] {};
-		TCHAR progPath2[1024] {};
-		TCHAR progCmd[1024] {};
-		TCHAR workDir1[1024] {};
-		TCHAR workDir2[1024] {};
+		wchar_t progPath1[1024] {};
+		wchar_t progPath2[1024] {};
+		wchar_t progCmd[1024] {};
+		wchar_t workDir1[1024] {};
+		wchar_t workDir2[1024] {};
 
-		GetPrivateProfileString(pFn, TEXT("progPath"), TEXT(""), progPath1, 1024, confPathValue);
-        GetPrivateProfileString(pFn, TEXT("progCmd"), TEXT(""), progCmd, 1024, confPathValue);
-        GetPrivateProfileString(pFn, TEXT("workDir"), TEXT(""), workDir1, 1024, confPathValue);
+		GetPrivateProfileString(pFn, L"progPath", L"", progPath1, 1024, confPathValue);
+        GetPrivateProfileString(pFn, L"progCmd", L"", progCmd, 1024, confPathValue);
+        GetPrivateProfileString(pFn, L"workDir", L"", workDir1, 1024, confPathValue);
 
 		if (progPath1[0] && progCmd[0] && workDir1[0])
 		{
@@ -244,15 +242,15 @@ int getCmdsFromConf(const TCHAR *confPathValue, CmdParam *cmdParamValue, int /*m
             lstrcpy(cmdParamValue[i]._workDir, workDir2);
 
             // optional parameter here
-			TCHAR progInput[1024];
-            TCHAR progOutput[1024];
-            TCHAR replaceSelection[8];
-			GetPrivateProfileString(pFn, TEXT("progInput"), TEXT(""), progInput, 1024, confPathValue);
-            GetPrivateProfileString(pFn, TEXT("progOutput"), TEXT(""), progOutput, 1024, confPathValue);
-            GetPrivateProfileString(pFn, TEXT("replaceSelection"), TEXT("true"), replaceSelection, 8, confPathValue);
+			wchar_t progInput[1024];
+            wchar_t progOutput[1024];
+            wchar_t replaceSelection[8];
+			GetPrivateProfileString(pFn, L"progInput", L"", progInput, 1024, confPathValue);
+            GetPrivateProfileString(pFn, L"progOutput", L"", progOutput, 1024, confPathValue);
+            GetPrivateProfileString(pFn, L"replaceSelection", L"true", replaceSelection, 8, confPathValue);
             lstrcpy(cmdParamValue[i]._progInput, progInput);
             lstrcpy(cmdParamValue[i]._progOutput, progOutput);
-            if (generic_stricmp(TEXT("false"), replaceSelection) == 0)
+            if (generic_stricmp(L"false", replaceSelection) == 0)
                 cmdParamValue[i]._doReplaceSelection = false;
 			i++;
 		}
@@ -263,7 +261,7 @@ int getCmdsFromConf(const TCHAR *confPathValue, CmdParam *cmdParamValue, int /*m
 	return i;
 }
 
-void replaceStr(generic_string & str, generic_string str2BeReplaced, generic_string replacement)
+void replaceStr(std::wstring & str, std::wstring str2BeReplaced, std::wstring replacement)
 {
 	size_t pos = str.find(str2BeReplaced);
 
@@ -273,11 +271,11 @@ void replaceStr(generic_string & str, generic_string str2BeReplaced, generic_str
 
 void launchProgram(const CmdParam & cmdParamValue)
 {
-    const TCHAR *programPath = cmdParamValue._progPath; 
-    const TCHAR *param = cmdParamValue._progCmd;
-    const TCHAR *programDir = cmdParamValue._workDir;
-    const TCHAR *progInput = cmdParamValue._progInput;
-    const TCHAR *progOutput = cmdParamValue._progOutput;
+    const wchar_t* programPath = cmdParamValue._progPath; 
+    const wchar_t* param = cmdParamValue._progCmd;
+    const wchar_t* programDir = cmdParamValue._workDir;
+    const wchar_t* progInput = cmdParamValue._progInput;
+    const wchar_t* progOutput = cmdParamValue._progOutput;
     bool doReplace = cmdParamValue._doReplaceSelection;
 
 	HWND hCurrScintilla = getCurrentScintillaHandle();
@@ -298,15 +296,15 @@ void launchProgram(const CmdParam & cmdParamValue)
 		pAsciiText = new char[asciiTextLen + 1];
 		::SendMessage(hCurrScintilla, SCI_GETSELTEXT, 0, (LPARAM)pAsciiText);
 	}
-    TCHAR newProgramDir[MAX_PATH];
+    wchar_t newProgramDir[MAX_PATH];
     lstrcpy(newProgramDir, programPath);
     ::PathRemoveFileSpec(newProgramDir);
 
-    const TCHAR *pProgramDir = programDir?programDir:newProgramDir;
+    const wchar_t *pProgramDir = programDir?programDir:newProgramDir;
 
-    generic_string paramInput = param;
-    generic_string progInputStr = progInput?progInput:TEXT("");
-    generic_string progOutputStr = progOutput?progOutput:TEXT("");
+    std::wstring paramInput = param;
+    std::wstring progInputStr = progInput ? progInput : L"";
+    std::wstring progOutputStr = progOutput ? progOutput : L"";
 
 //todo : convert from correct encoding
     std::string inputA = pAsciiText ? pAsciiText : "";
@@ -315,34 +313,34 @@ void launchProgram(const CmdParam & cmdParamValue)
 		return (wchar_t)c;
 	});
 
-    generic_string selectedText = inputW;
-	generic_string quotedSelectedText = TEXT("\"") + selectedText + TEXT("\"");
+    std::wstring selectedText = inputW;
+	std::wstring quotedSelectedText = L"\"" + selectedText + L"\"";
 
     const int temBufLen = 32;
-	TCHAR tmpbuf[temBufLen];
+	wchar_t tmpbuf[temBufLen];
 	time_t ltime = time(0);
 	struct tm *today;
 
 	today = localtime(&ltime);
-	generic_strftime(tmpbuf, temBufLen, TEXT("%Y-%m-%d_%H%M%S"), today);
+	generic_strftime(tmpbuf, temBufLen, L"%Y-%m-%d_%H%M%S", today);
 
-	generic_string timeStampString = tmpbuf;
+	std::wstring timeStampString = tmpbuf;
 
-    replaceStr(paramInput, TEXT("$(TIMESTAMP)"), timeStampString);
-    replaceStr(paramInput, TEXT("$(SELECTION)"), quotedSelectedText);
-    if (progInputStr != TEXT(""))
+    replaceStr(paramInput, L"$(TIMESTAMP)", timeStampString);
+    replaceStr(paramInput, L"$(SELECTION)", quotedSelectedText);
+    if (!progInputStr.empty())
     {
-        replaceStr(progInputStr, TEXT("$(TIMESTAMP)"), timeStampString);
+        replaceStr(progInputStr, L"$(TIMESTAMP)", timeStampString);
     }
 
-    if (progOutputStr != TEXT(""))
+    if (!progOutputStr.empty())
     {
-        replaceStr(progOutputStr, TEXT("$(TIMESTAMP)"), timeStampString);
+        replaceStr(progOutputStr, L"$(TIMESTAMP)", timeStampString);
     }
 
-    if (progInputStr != TEXT(""))
+    if (!progInputStr.empty())
     {
-       	FILE *f = generic_fopen(progInputStr.c_str(), TEXT("wb"));
+       	FILE *f = generic_fopen(progInputStr.c_str(), L"wb");
 	    if (f)
 	    {
             fwrite(selectedText.c_str(), sizeof((selectedText.c_str())[0]), selectedText.length(), f);
@@ -358,7 +356,7 @@ void launchProgram(const CmdParam & cmdParamValue)
         const char *pOutput = NULL;
         size_t pOutputLen = 0;
         // If progOutput is defined, then we search the file to read
-        if (progOutputStr != TEXT("") && doReplace)
+        if (!progOutputStr.empty() && doReplace)
         { 
             if (::PathFileExists(progOutputStr.c_str()))
             {
@@ -397,7 +395,7 @@ void launchProgram(const CmdParam & cmdParamValue)
             }
             else
             {
-                ::MessageBox(NULL, TEXT("The file is invalid"), progOutputStr.c_str(), MB_OK);
+                ::MessageBox(NULL, L"The file is invalid", progOutputStr.c_str(), MB_OK);
             }
         }
         // otherwise, we look in stdout
@@ -418,12 +416,12 @@ void launchProgram(const CmdParam & cmdParamValue)
         else
         {
             if (doReplace)
-                ::MessageBox(NULL, TEXT("No output"), TEXT("Problem"), MB_OK);
+                ::MessageBox(NULL, L"No output", L"Problem", MB_OK);
         }
     }
     else
     {
-        ::MessageBox(NULL, program.getStderr(), TEXT("Error"), MB_OK);
+        ::MessageBox(NULL, program.getStderr(), L"Error", MB_OK);
     }
 
 	if (asciiTextLen > 0)
@@ -474,9 +472,9 @@ void editCommands()
 {
 	if (!::PathFileExists(confPath))
 	{
-		generic_string msg = confPath;
-		msg += TEXT(" is not present.\rPlease create this file manually.");
-		::MessageBox(nppData._nppHandle, msg.c_str(), TEXT("Configuration file is absent"), MB_OK);
+		std::wstring msg = confPath;
+		msg += L" is not present.\rPlease create this file manually.";
+		::MessageBox(nppData._nppHandle, msg.c_str(), L"Configuration file is absent", MB_OK);
 		return;
 	}
 	::SendMessage(nppData._nppHandle, NPPM_DOOPEN, 0, (LPARAM)confPath);

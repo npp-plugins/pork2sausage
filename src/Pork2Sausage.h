@@ -1,5 +1,5 @@
 //this file is part of Notepad++ plugin Pork2Sausage
-//Copyright (C)2024 Don HO <don.h@free.fr>
+//Copyright (C)2025 Don HO <don.h@free.fr>
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -47,9 +47,6 @@
 #define generic_sprintf swprintf
 #define COPYDATA_FILENAMES COPYDATA_FILENAMESW
 
-
-typedef std::basic_string<TCHAR> generic_string;
-
 struct CmdParam {
 	TCHAR _cmdName[menuItemSize] {};
 	PFUNCPLUGINCMD _pMainFunc = nullptr;
@@ -61,8 +58,6 @@ struct CmdParam {
 	TCHAR _progOutput[1024] {};
 	bool _doReplaceSelection = true;
 };
-
-
 
 void launchProgram(const CmdParam & cmdParamValue);
 

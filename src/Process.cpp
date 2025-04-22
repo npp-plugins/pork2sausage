@@ -1,5 +1,5 @@
 //this file is part of notepad++
-//Copyright (C)2022 Don HO <don.h@free.fr>
+//Copyright (C)2025 Don HO <don.h@free.fr>
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -104,7 +104,7 @@ BOOL Process::run()
         if (_type == CONSOLE_PROG)
         {
 		    hListenerEvent[0] = ::CreateEvent(NULL, FALSE, FALSE, TEXT("listenerEvent"));
-		    if(!hListenerEvent[0])
+		    if (!hListenerEvent[0])
 			    error(TEXT("CreateEvent"), result, 1003);
 
 		    hListenerEvent[1] = ::CreateEvent(NULL, FALSE, FALSE, TEXT("listenerStdErrEvent"));
@@ -152,7 +152,7 @@ BOOL Process::run()
 			    }
 		    }
         }
-	} catch (int coderr){
+	} catch (int coderr) {
 		TCHAR str[10];
 		wsprintf(str, TEXT("%d"), coderr);
 		::MessageBox(NULL, str, TEXT("Exception :"), MB_OK);
@@ -186,17 +186,13 @@ BOOL Process::run()
 
 void Process::listenerStdOut()
 {
-	//BOOL Result = 0;
-	//DWORD size = 0;
 	DWORD bytesAvail = 0;
 	BOOL result = 0;
 	HANDLE hListenerEvent = ::OpenEvent(EVENT_ALL_ACCESS, FALSE, TEXT("listenerEvent"));
-	//FILE *fp = NULL;
 
 	int taille = 0;
 	bool outstandingIO = false;
 	char bufferOut[MAX_LINE_LENGTH + 1];
-	//TCHAR bufferErr[MAX_LINE_LENGTH + 1];
 
 	int nExitCode = STILL_ACTIVE;
 	
@@ -204,10 +200,9 @@ void Process::listenerStdOut()
 
 	::ResumeThread(_hProcessThread);
 
-	for(;;)
+	for (;;)
 	{ // got data
 		memset(bufferOut, 0x00, MAX_LINE_LENGTH + 1); 
-		//memset(bufferErr,0x00,MAX_LINE_LENGTH + 1);
 		taille = sizeof(bufferOut) - sizeof(char);
 		outstandingIO = false;
 
