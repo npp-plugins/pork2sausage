@@ -17,8 +17,8 @@
 
 #pragma once
 
-#define VERSION_VALUE "2.5\0"
-#define VERSION_DIGITALVALUE 2, 5, 0, 0
+#define VERSION_VALUE "2.6\0"
+#define VERSION_DIGITALVALUE 2, 6, 0, 0
 
 #define IDD_ABOUTBOX 250
 
